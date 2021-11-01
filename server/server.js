@@ -1,5 +1,4 @@
 const express = require("express");
-const path = require("path");
 const fs = require("fs");
 const bodyParser = require("body-parser");
 
@@ -27,9 +26,15 @@ let app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.post("/formsubmissions", (req, res) => {
+app.post("/contact-info", (req, res) => {
+    fs.readFile("formsubmissions.json", (err, data) => {
+        const formData = JSON.parse(data);
+        formData.push(req.body);
+    })
+    fs.appendFile("formsubmissions.json", JSON.stringify(formData), (err) => {
+      console.log(err)
 
-    fs.appendFileSync("contact-info.json", `${req.body.name}, ${req.body.email}`)
+    })
     res.send("Contact submitted");
     next();
     
@@ -37,11 +42,9 @@ app.post("/formsubmissions", (req, res) => {
 
 
 app.get("/formsubmissions", (req, res) => {
-    
-    res.send(`${name}, ${email}`);
-    
+    fs.readFile("formsubmissions.json", (err, data) => res.send(data));
 });
 
-app.use(express.static(path.join(__dirname, "../public")));
+app.use(express.static("public"));
 
 app.listen(3000);
